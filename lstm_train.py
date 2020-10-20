@@ -87,26 +87,33 @@ def main(args):
         transforms.ToTensor(),
     ])
 
-    train_dataset = ImageFolder(root=train_data_path, transform=train_transforms)
-    valid_dataset = ImageFolder(root=valid_data_path, transform=valid_transforms)
+    train_dataset = ImageFolder(
+        root=train_data_path, transform=train_transforms)
+    valid_dataset = ImageFolder(
+        root=valid_data_path, transform=valid_transforms)
 
-    weights = make_weights_for_balanced_classes(train_dataset.imgs, len(train_dataset.classes))
+    weights = make_weights_for_balanced_classes(
+        train_dataset.imgs, len(train_dataset.classes))
     weights = torch.DoubleTensor(weights)
-    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
+    sampler = torch.utils.data.sampler.WeightedRandomSampler(
+        weights, len(weights))
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, sampler=sampler, batch_size=args.batch_size)
-    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, sampler=sampler, batch_size=args.batch_size)
+    valid_loader = torch.utils.data.DataLoader(
+        valid_dataset, batch_size=args.batch_size, shuffle=False)
 
     train_total = len(train_loader)
     valid_total = len(valid_loader)
 
     model = resnet18(num_classes=5).to(args.device)
-    model.conv_stem = nn.Conv2d(1, 40, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    model.conv_stem = nn.Conv2d(1, 40, kernel_size=(
+        3, 3), stride=(2, 2), padding=(1, 1), bias=False)
     model.classifier = nn.Linear(in_features=1536, out_features=5, bias=True)
 
     model = model.to(args.device)
 
-    ############################## test
+    # test
     # data_iter = iter(train_loader)
     # data, labels = data_iter.next()
     #
@@ -121,16 +128,19 @@ def main(args):
 
     criterion = nn.CrossEntropyLoss().to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [30, 80], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        optimizer, [30, 80], gamma=0.1)
 
     best_acc = 0
 
     for e in range(0, args.epochs):
-        train_correct, train_loss = train(model, train_loader, optimizer, criterion, device=args.device)
+        train_correct, train_loss = train(
+            model, train_loader, optimizer, criterion, device=args.device)
         train_acc = train_correct / (train_total * args.batch_size)
         train_loss = train_loss / (train_total * args.batch_size)
 
-        valid_correct, valid_loss = valid(model, valid_loader, criterion, device=args.device)
+        valid_correct, valid_loss = valid(
+            model, valid_loader, criterion, device=args.device)
         valid_acc = valid_correct / (valid_total * args.batch_size)
         valid_loss = valid_loss / (valid_total * args.batch_size)
 
@@ -139,7 +149,7 @@ def main(args):
               f"|| [VALID ACC : {valid_acc}] || [VALID LOSS : {valid_loss}]")
 
         if best_acc < valid_acc:
-            torch.save(model.state_dict(), './resnet18.pth')
+            torch.save(model.state_dict(), './checkpoint/resnet18.pth')
             best_acc = valid_acc
 
 

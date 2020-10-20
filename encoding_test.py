@@ -101,7 +101,7 @@ def main(args):
     test_total = len(test_loader)
 
     model = resnet18(num_classes=5).to(args.device)
-    model.load_state_dict(torch.load('./resnet18_encoding.pth'))
+    model.load_state_dict(torch.load('./checkpoint/resnet18_encoding.pth'))
 
     criterion = nn.CrossEntropyLoss().to(args.device)
 

@@ -65,22 +65,28 @@ def main(args):
 
     total_dataset = ImageFolder(root=DATA_PATH, transform=total_transforms)
     total_length = len(total_dataset)
-    split = [round(total_length * 0.7), round(total_length * 0.15), round(total_length * 0.15) - 1]
+    split = [round(total_length * 0.7), round(total_length *
+                                              0.15), round(total_length * 0.15) - 1]
 
-    train_dataset, valid_dataset, test_dataset = torch.utils.data.random_split(total_dataset, split)
+    train_dataset, valid_dataset, test_dataset = torch.utils.data.random_split(
+        total_dataset, split)
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False)
-    test_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=args.batch_size, shuffle=True)
+    valid_loader = torch.utils.data.DataLoader(
+        valid_dataset, batch_size=args.batch_size, shuffle=False)
+    test_loader = torch.utils.data.DataLoader(
+        valid_dataset, batch_size=args.batch_size, shuffle=False)
 
     train_total = len(train_loader)
     valid_total = len(valid_loader)
 
     model = SegNet().to("cuda")
-    model.load_state_dict(torch.load('./autoencoder_Fpz_Cz.pth'))
+    model.load_state_dict(torch.load('./checkpoint/autoencoder_Fpz_Cz.pth'))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [30, 80], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        optimizer, [30, 80], gamma=0.1)
 
     minimum_loss = 1000
 
@@ -94,7 +100,8 @@ def main(args):
         valid_loss = valid_loss / valid_total * args.batch_size
 
         scheduler.step()
-        print(f"[EPOCH : {args.epochs} / {e}] || [TRAIN LOSS : {train_loss}] || [VALID LOSS : {valid_loss}]")
+        print(
+            f"[EPOCH : {args.epochs} / {e}] || [TRAIN LOSS : {train_loss}] || [VALID LOSS : {valid_loss}]")
 
         if minimum_loss > valid_loss:
             torch.save(model.state_dict(), args.save_path)
@@ -107,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", default=100)
     parser.add_argument("--lr", default=0.01)
     parser.add_argument("--device", default="cuda")
-    parser.add_argument("--save_path", default="./autoencoder_fpz_cz.pth")
+    parser.add_argument("--save_path", default="./checkpoint/autoencoder_fpz_cz.pth")
     args = parser.parse_args()
 
     main(args)

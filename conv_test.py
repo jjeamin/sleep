@@ -41,13 +41,16 @@ def test(model, test_loader, criterion, device="cuda"):
         loss = criterion(pred, labels)
         test_loss += loss.item()
 
-    metrics = confusion_matrix(total_labels, total_predicted, labels=[0, 1, 2, 3, 4])
+    metrics = confusion_matrix(
+        total_labels, total_predicted, labels=[0, 1, 2, 3, 4])
     f1 = f1_score(total_labels, total_predicted, average=None)
     f1_macro = f1_score(total_labels, total_predicted, average='macro')
     f1_micro = f1_score(total_labels, total_predicted, average='micro')
     f1_weighted = f1_score(total_labels, total_predicted, average='weighted')
-    plot_confusion_matrix(metrics, classes=LABELS, normalize=False, title='Confusion matrix')
-    plot_confusion_matrix(metrics, classes=LABELS, normalize=True, title='Confusion matrix')
+    plot_confusion_matrix(metrics, classes=LABELS,
+                          normalize=False, title='Confusion matrix')
+    plot_confusion_matrix(metrics, classes=LABELS,
+                          normalize=True, title='Confusion matrix')
 
     print(f"F1 score : {f1}")
     print(f"F1 socre macro : {f1_macro}")
@@ -106,7 +109,8 @@ def main(args):
     ])
 
     test_dataset = ImageFolder(root=test_data_path, transform=test_transforms)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(
+        test_dataset, batch_size=args.batch_size, shuffle=True)
 
     test_total = len(test_loader)
 
@@ -120,7 +124,8 @@ def main(args):
 
     criterion = nn.CrossEntropyLoss().to(args.device)
 
-    test_correct, test_loss = test(model, test_loader, criterion, device=args.device)
+    test_correct, test_loss = test(
+        model, test_loader, criterion, device=args.device)
     test_acc = test_correct / (test_total * args.batch_size)
     test_loss = test_loss / (test_total * args.batch_size)
     print(f"[TEST ACC : {test_acc}] | [TEST LOSS : {test_loss}]")
@@ -129,7 +134,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", default="store/public_dataset")
-    parser.add_argument("--load_path", default="./resnet18_pz.pth")
+    parser.add_argument("--load_path", default="./checkpoint/resnet18_pz.pth")
     parser.add_argument("--channel", default="Pz-Oz")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--batch_size", default=1)

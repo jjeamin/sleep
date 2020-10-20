@@ -119,7 +119,7 @@ def main(args):
               f"|| [VALID ACC : {valid_acc}] || [VALID LOSS : {valid_loss}]")
 
         if best_acc < valid_acc:
-            torch.save(model.state_dict(), './resnet18_encoding.pth')
+            torch.save(model.state_dict(), './checkpoint/resnet18_encoding.pth')
             best_acc = valid_acc
 
 
